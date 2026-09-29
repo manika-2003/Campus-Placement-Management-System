@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPMS</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+
+  <body>
+    <%- include('../partials/header') %> <% if(applications.length === 0){ %>
+
+    <div class="noApplications">
+      There are currently no student applications to review.
+    </div>
+
+    <% } else { %>
+
+    <div class="applicationContainer">
+      <h2>Manage Job Applications</h2>
+
+      <table class="applicationTable">
+        <tr>
+          <th>Student Name</th>
+          <th>Job Title</th>
+          <th>Resume</th>
+          <th>Action</th>
+        </tr>
+
+        <% applications.forEach(app => { %> <% app.appliedJobs.forEach(job => {
+        %>
+
+        <tr>
+          <td><%= app.userId.username %></td>
+
+          <td><%= job.jobId.jobTitle %></td>
+
+          <td>
+            <button class="resumeBtn">View Resume</button>
+          </td>
+
+          <td class="btns">
+            <button
+              class="approveBtn <%= job.applicationStatus==='approved' ? 'activeApprove' : '' %>"
+              onclick="approveClick('<%=app.userId._id%>','<%=job.jobId._id%>',this)"
+            >
+              <%= job.applicationStatus==='approved' ? 'Approved' : 'Approve' %>
+            </button>
+
+            <button
+              class="rejectBtn <%= job.applicationStatus==='rejected' ? 'activeReject' : '' %>"
+              onclick="rejectClick('<%=app.userId._id%>','<%=job.jobId._id%>',this)"
+            >
+              <%= job.applicationStatus==='rejected' ? 'Rejected' : 'Reject' %>
+            </button>
+          </td>
+        </tr>
+
+        <% }) %> <% }) %>
+      </table>
+    </div>
+
+    <% } %>
+
+    <script>
+      function approveClick(userId, jobId, btn) {
+        fetch(`/admin/applications/approve/${userId}/${jobId}`, {
+          method: "PATCH",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              const rejectBtn = btn.nextElementSibling;
+
+              btn.classList.add("activeApprove");
+              btn.innerText = "Approved";
+
+              rejectBtn.classList.remove("activeReject");
+              rejectBtn.innerText = "Reject";
+            } else {
+              alert("Status update failed");
+            }
+          });
+      }
+
+      function rejectClick(userId, jobId, btn) {
+        fetch(`/admin/applications/reject/${userId}/${jobId}`, {
+          method: "PATCH",
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              const approveBtn = btn.previousElementSibling;
+
+              btn.classList.add("activeReject");
+              btn.innerText = "Rejected";
+
+              approveBtn.classList.remove("activeApprove");
+              approveBtn.innerText = "Approve";
+            } else {
+              alert("Status update failed");
+            }
+          });
+      }
+    </script>
+  </body>
+</html>

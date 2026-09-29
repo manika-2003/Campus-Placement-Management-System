@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPMS</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <%-include('../partials/header')  %>
+    <div class="main-dashboard">
+        <h2>Application Status</h2>
+         <%if(!applications.length){%>
+         <div class="emptyBtnDiv">
+          <button class="redirectBtn" onclick="window.location.href='/student'">Apply For Jobs</button>
+         </div>
+      <%}else{ applications.forEach(job => { %>
+      <div class="job-card">
+        <div class="job-details">
+          <h3><%= job.jobId.jobTitle %></h3>
+          <p><strong>Company:</strong> <%= job.jobId.companyName %></p>
+          <p><strong>Location:</strong> <%= job.jobId.location %></p>
+          <p><strong>Package:</strong> <%= job.jobId.package %></p>
+          <p><strong>Eligibility:</strong> <%= job.jobId.eligibilityCriteria %></p>
+        </div>
+        <div id="apply-btn">
+            <% if(job.applicationStatus==='approved') {%>
+              <button disabled class="applied">Approved</button>
+            <%}else if(job.applicationStatus==='pending'){%>
+            <button disabled class="applied">Pending</button>
+           <% }else {%>
+            <button disabled class="applied">Rejected</button>
+           <%}%>
+          </div>
+      </div>
+      <% })} %>
+    </div>   
+</body>
+</html>

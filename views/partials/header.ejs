@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMPS</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="navbar">
+      <% if(!user){%>
+      <div class="nav-left">
+        <h2>Campus Placement System</h2>
+      </div>
+      <div class="nav-right">
+        <a href="/">Home</a>
+        <a href="/auth/login">Login</a>
+      </div>
+      <% } else if(user.role==='admin'){%>
+      <div class="nav-left">
+        <h2>Campus Placement System</h2>
+      </div>
+      <div class="nav-right">
+        <a href="/admin">Dashboard</a>
+        <a href="/admin/addJob">Add Job</a>
+        <a href="/admin/applications">Applications</a>
+        <a onclick="logoutAlert()" class="logout">Logout</a>
+      </div>
+      <% } else { %>
+      <div class="nav-left">
+        <h2>Campus Placement System</h2>
+      </div>
+      <div class="nav-right">
+        <a href="/student">Dashboard</a>
+        <a href="/student/jobs">Jobs</a>
+        <a href="/student/profile">Profile</a>
+        <a onclick="logoutAlert()" class="logout">Logout</a>
+      </div>
+      <% } %>
+    </header>
+    <script>
+      function logoutAlert() {
+        if (confirm("Are You sure want to logout ") == true) {
+          window.location.href = "/auth/logout";
+        } 
+        
+      }
+    </script>
+  </body>
+</html>

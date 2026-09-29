@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CPMS</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body class="body">
+    <%- include('../partials/header') %>
+
+    <h2 id="post-job" class="heading">Post a New Job</h2>
+
+    <form id="jobForm" class="auth-form">
+      <input type="text" name="title" placeholder="Job Title" required />
+      <input type="text" name="company" placeholder="Company Name" required />
+      <input type="text" name="location" placeholder="Location" required />
+      <input type="text" name="package" placeholder="Package" required />
+      <input
+        type="text"
+        name="eligibility"
+        placeholder="Eligibility Criteria"
+        required
+      />
+      <input type="date" name="lastDate" required />
+      <div class="btn-container">
+        <button type="submit">Add Job</button>
+        <button type="reset" id="resetBtn">Reset</button>
+      </div>
+    </form>
+    <%- include('../partials/footer') %>
+    <script>
+      document
+        .getElementById("jobForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const form = e.target;
+
+          const jobData = {
+            title: form.title.value,
+            company: form.company.value,
+            location: form.location.value,
+            package: form.package.value,
+            eligibility: form.eligibility.value,
+            lastDate: form.lastDate.value,
+          };
+          if (
+            !jobData.title ||
+            !jobData.company ||
+            !jobData.location ||
+            !jobData.package ||
+            !jobData.eligibility ||
+            !jobData.lastDate
+          ) {
+            return alert("Enter all fields");
+          }
+          try {
+            const res = await fetch("/admin/addJob", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(jobData),
+            });
+
+            const data = await res.json();
+            if(data.success){
+                alert(data.message)
+                form.reset()
+            }
+            else{
+                alert(data.message)
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Error posting job");
+          }
+        });
+    </script>
+  </body>
+</html>

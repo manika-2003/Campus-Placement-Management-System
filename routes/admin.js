@@ -1,0 +1,12 @@
+const express = require('express')
+const router = express.Router()
+const {adminDashboardInfo,getAddJob,addJob,deleteJob, editJob, showApplications, approveApplication, rejectApplication} = require('../controllers/adminController')
+router.get("/",adminDashboardInfo)
+router.get('/addJob',getAddJob)
+router.post('/addJob',addJob)
+router.patch('/editJob/:jobId',editJob)
+router.delete('/delete/:jobId',deleteJob)
+router.get('/applications',showApplications)
+router.patch('/applications/approve/:userId/:jobId',approveApplication)
+router.patch('/applications/reject/:userId/:jobId',rejectApplication)
+module.exports = router

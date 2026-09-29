@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMPS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+    <div class="main-dashboard">
+      <h1>Welcome, Admin</h1>
+
+      <div class="stats">
+        <div class="card green">
+          <h3>Total Students</h3>
+          <p><%= dashboard.totalStudents %></p>
+        </div>
+
+        <div class="card blue">
+          <h3>Total Jobs</h3>
+          <p><%= dashboard.totalJobs %></p>
+        </div>
+
+        <div class="card orange">
+          <h3>Total Applications</h3>
+          <p><%= dashboard.totalApplications %></p>
+        </div>
+        <div class="card skyBlue">
+          <h3>Total Approved Applications</h3>
+          <p><%= dashboard.totalApprovedApplications %></p>
+        </div>
+        <div class="card indigo">
+          <h3>Total Pending Applications</h3>
+          <p><%= dashboard. totalPendingApplications %></p>
+        </div>
+        <div class="card red">
+          <h3>Total Rejected Applications</h3>
+          <p><%= dashboard.totalRejectedApplications %></p>
+        </div>
+      </div>
+      <h2>Job Listings</h2>
+
+      <% dashboard.jobListing.forEach(job => { %>
+      <div class="job-card">
+        <div class="job-details">
+          <h3><%= job.jobTitle %></h3>
+          <p><strong>Company:</strong> <%= job.companyName %></p>
+          <p><strong>Location:</strong> <%= job.location %></p>
+          <p><strong>Package:</strong> <%= job.package %></p>
+          <p><strong>Eligibility:</strong> <%= job.eligibilityCriteria %></p>
+        </div>
+        <div id="apply-btn">
+          <button
+            onclick="openModal(
+            '<%= job._id %>', 
+            '<%= job.jobTitle %>',
+            '<%= job.companyName %>',
+            '<%= job.location %>',
+            '<%= job.package %>',
+            '<%= job.eligibilityCriteria %>',
+            '<%= job.lastDateToApply %>')"
+          >
+            Edit
+          </button>
+          <button onclick="deleteJob('<%=job._id %>')" class="del-btn">
+            Delete
+          </button>
+        </div>
+      </div>
+      <% }) %>
+      <!-- Edit Modal -->
+      <div id="editModal" class="modal">
+        <div class="modal-content">
+
+          <form id="jobForm" class="auth-form">
+            <h1>Edit Job</h1>
+            <input
+              type="text"
+              name="title"
+              placeholder="Job Title"
+              id="title"
+              required
+            />
+            <input
+              type="text"
+              name="company"
+              placeholder="Company Name"
+              id="company"
+              required
+            />
+            <input
+              type="text"
+              name="location"
+              placeholder="Location"
+              id="location"
+              required
+            />
+            <input
+              type="text"
+              name="package"
+              placeholder="Package"
+              id="package"
+              required
+            />
+            <input
+              type="text"
+              name="eligibility"
+              placeholder="Eligibility Criteria"
+              id="eligibility"
+              required
+            />
+            <input type="date" name="lastDate" id="lastDate" required />
+            <div class="btn-container">
+              <button type="submit">Update</button>
+              <button type="button" onclick="closeModel(event)">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <%- include('../partials/footer') %>
+    <script>
+      let currentJobId = null
+      const openModal = (jobId,title,companyName,location,salary,eligibilityCriteria,lastDateToApply) => {
+        currentJobId = jobId
+        document.getElementById("editModal").style.display = "flex";
+        document.getElementById("title").value = title;
+        document.getElementById("company").value = companyName;
+        document.getElementById("location").value = location;
+        document.getElementById("package").value = salary;
+        document.getElementById("eligibility").value = eligibilityCriteria;
+        document.getElementById("lastDate").value = lastDateToApply;
+      };
+      const closeModel = (e) => {
+        e.preventDefault()
+        document.getElementById("editModal").style.display = "none";
+      };
+      const deleteJob = async (jobId) => {
+        if (confirm("Are You sure want to delete job ") == false) {
+          return;
+        }
+        const data = await fetch(`/admin/delete/${jobId}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+        const response = await data.json();
+        console.log(response);
+        if (!response.success) {
+          return alert(response.message);
+        }
+        window.location.reload();
+      };
+      document
+        .getElementById("jobForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const form = e.target;
+
+          const jobData = {
+            title: form.title.value,
+            company: form.company.value,
+            location: form.location.value,
+            package: form.package.value,
+            eligibility: form.eligibility.value,
+            lastDate: form.lastDate.value,
+          };
+          if (
+            !jobData.title ||
+            !jobData.company ||
+            !jobData.location ||
+            !jobData.package ||
+            !jobData.eligibility ||
+            !jobData.lastDate
+          ) {
+            return alert("Enter all fields");
+          }
+          try {
+            const res = await fetch(`admin/editJob/${currentJobId}`, {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(jobData),
+            });
+
+            const data = await res.json();
+            if(data.success){
+                form.reset()
+                window.location.href='/admin'
+                
+            }
+            else{
+                alert(data.message)
+            }
+          } catch (err) {
+            console.error(err);
+            alert("Error posting job");
+          }
+        });
+    </script>
+  </body>
+</html>

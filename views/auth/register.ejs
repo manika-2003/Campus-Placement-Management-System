@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+
+  <body class="body">
+    <%-include('../partials/header')%>
+
+    <h1 id="register" class="heading">Register</h1>
+
+    <form class="auth-form">
+     <div class="radio-container">
+      <div class="radio">
+        <label>
+          User
+        </label>
+        <input type="radio" name="role" id="studentRole" class="userRole" value="user" checked />
+      </div>
+      <div class="radio">
+        <label>
+          Admin
+        </label>
+        <input type="radio" name="role" id="adminRole" class="userRole" value="admin" />
+      </div>
+      
+     </div>
+
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter your username" />
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" placeholder="Enter your email" />
+
+      <label for="pass">Password:</label>
+      <input type="password" id="pass" placeholder="Enter your password" />
+
+      <label for="cpass">Confirm Password:</label>
+      <input type="password" id="cpass" placeholder="Enter your password" />
+
+      <!-- Admin Extra Field -->
+      <div id="adminField" style="display: none">
+        <label for="adminSecret">Admin Secret Key</label>
+        <input
+          type="text"
+          id="adminSecret"
+          placeholder="Enter admin secret key"
+        />
+      </div>
+
+      <button id="signup">Register</button>
+
+      <p id="message"></p>
+    </form>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+      const userRole = document.querySelector("#studentRole");
+      const adminRole = document.querySelector("#adminRole");
+      const adminField = document.querySelector("#adminField");
+
+      // show admin field when admin selected
+      adminRole.addEventListener("change", () => {
+        adminField.style.display = "block";
+      });
+
+      userRole.addEventListener("change", () => {
+        adminField.style.display = "none";
+      });
+
+      const signup = document.querySelector("#signup");
+
+      signup.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const name = document.querySelector("#username").value;
+        const email = document.querySelector("#email").value.toLowerCase();
+        const pass = document.querySelector("#pass").value;
+        const cpass = document.querySelector("#cpass").value;
+        const adminSecret = document.querySelector("#adminSecret").value;
+        const role = document.querySelector('input[name="role"]:checked').value;
+
+        const message = document.querySelector("#message");
+
+        if(role==='admin'){
+          if (!name || !email || !pass || !cpass || !adminSecret){
+            alert("Enter full details")
+            return
+          }
+        }
+        if (name && email && pass && cpass) {
+          const sendData = async () => {
+            try {
+              const data = await fetch("/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+
+                body: JSON.stringify({
+                  name,
+                  email,
+                  pass,
+                  cpass,
+                  role,
+                  adminSecret,
+                }),
+              });
+
+              const response = await data.json();
+
+              console.log(response);
+
+              if (response.success) {
+                window.location.href = "/auth/login";
+              } else {
+                message.innerText = response.message;
+              }
+            } catch (err) {
+              console.log("something went wrong!!!");
+            }
+          };
+
+          sendData();
+        } else {
+          alert("Enter full details");
+        }
+      });
+    </script>
+  </body>
+</html>

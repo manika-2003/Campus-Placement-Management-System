@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CPMS</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="home-body">
+
+<%- include('./partials/header') %>
+
+<section class="hero">
+    
+    <h1>Connecting Students to Careers</h1>
+    <p>Find the best opportunities for your future.</p>
+
+    <a href="/auth/login" class="login-btn">Login</a>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <a href="/student"><img src="/img/applyJob.png" alt="Apply"></a>  
+        <p>Apply for Jobs</p>
+    </div>
+
+    <div class="feature-card">
+     <a href="/student/applications"><img src="/img/track.png" alt="Track Applications"></a>  
+     <p>Track Your Applications</p>
+    </div>
+
+    <div class="feature-card">
+        <a href="/admin"><img src="/img/manage.png" alt="manage"></a>  
+        <p>Manage Placements</p>
+    </div>
+</section>
+
+<%- include('./partials/footer') %>
+
+</body>
+</html>

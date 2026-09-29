@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMPS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <%- include('../partials/header') %>
+    <div class="main-dashboard">
+      <h1>Welcome, <%= user.username %> 👋</h1>
+
+      <div class="stats">
+        <div class="card green">
+          <h3>Total Available Jobs</h3>
+          <p><%= dashboard.totalJobs %></p>
+        </div>
+
+        <div class="card blue">
+          <h3>Jobs Applied</h3>
+          <p><%= dashboard.appliedApplications %></p>
+        </div>
+
+        <div class="card orange">
+          <h3>Approved Applications</h3>
+          <p><%= dashboard.approvedApplications %></p>
+        </div>
+      </div>
+      <% if(dashboard.jobListing.length){%>
+      <h2>Job Listings</h2>
+      <% dashboard.jobListing.forEach(job => { %>
+      <div class="job-card">
+        <div class="job-details">
+          <h3><%= job.jobTitle %></h3>
+          <p><strong>Company:</strong> <%= job.companyName %></p>
+          <p><strong>Location:</strong> <%= job.location %></p>
+          <p><strong>Package:</strong> <%= job.package %></p>
+          <p><strong>Eligibility:</strong> <%= job.eligibilityCriteria %></p>
+        </div>
+        <div id="apply-btn">
+          <% if(dashboard.appliedJobsId.has(job._id.toString())) {%>
+            <button disabled class="applied">Applied</button>
+          <%}else{%>
+            <form action="/student/apply/<%= job._id %>" method="POST">
+                <button type="submit">Apply</button>
+              </form>
+         <% } %>
+        </div>
+      </div>
+      <% })} %>
+    </div>
+    <%- include('../partials/footer') %>
+  </body>
+</html>

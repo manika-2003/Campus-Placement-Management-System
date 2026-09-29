@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 400px;
+        border-radius: 8px;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .close:hover {
+        color: black;
+      }
+      .modal input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .modal button {
+        background-color: #3498db;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      .modal button:hover {
+        background-color: #2980b9;
+      }
+      .skill-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 10px;
+      }
+      .skill-remove {
+        cursor: pointer;
+        color: red;
+        font-weight: bold;
+      }
+      .success-message {
+        color: green;
+        margin: 10px 0;
+      }
+      .error-message {
+        color: red;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+
+  <body class="profile-body">
+    <%-include('../partials/header') %>
+    <div class="profile-page">
+      <h1 class="profile-title">My Profile</h1>
+
+      <div class="profile-card">
+        <!-- LEFT SIDE -->
+        <div class="profile-left">
+          <div class="profile-avatar-box">
+            <img src="/images/profile.png" class="profile-avatar" />
+          </div>
+
+          <h2 class="profile-name"><%= user.username %></h2>
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="profile-right">
+          <!-- Name Section -->
+          <div class="profile-row profile-info">
+            <div class="row-info">
+              <span class="profile-label">Name:</span>
+              <span class="profile-value"><%= user.username %></span>
+            </div>
+            <div class="edit-profile-btn">
+              <button class="edit-profile-btn" onclick="openEditModal('name', '<%= user.username %>')">Edit</button>
+            </div>
+          </div>
+          <hr />
+          
+          <!-- Email Section -->
+          <div class="profile-row profile-info">
+            <div class="row-info">
+              <span class="profile-label">Email:</span>
+              <span class="profile-value"><%= user.email %></span>
+            </div>
+            <div class="edit-profile-btn">
+              <button class="edit-profile-btn" onclick="openEditModal('email', '<%= user.email %>')">Edit</button>
+            </div>
+          </div>
+          <hr />
+
+          <!-- Skills Section -->
+          <div class="profile-row skill-cards">
+            <span class="profile-label">Skills:</span>
+
+            <div class="profile-skill-wrapper">
+              <% if(user.skills && user.skills.length > 0) { %>
+                <% user.skills.forEach(skill => { %>
+                <div class="skill-item">
+                  <span class="profile-skill"><%= skill %></span>
+                  <span class="skill-remove" onclick="removeSkill('<%= skill %>')">×</span>
+                </div>
+                <% }) %>
+              <% } else { %>
+              <p style="color: #666;">No skills added yet</p>
+              <% } %>
+            </div>
+          </div>
+
+          <form action="/student/add-skill" method="POST" class="profile-skill-form">
+            <input type="text" name="skill" placeholder="Add skill" required />
+            <button type="submit">Add</button>
+          </form>
+
+          <hr />
+
+          <!-- Resume Section -->
+          <div class="profile-row profile-info">
+            <span class="profile-label">Resume:</span>
+
+            <% if(user.resume){ %>
+            <div class="resume-display">
+              <span class="resume-icon">📄</span>
+              <a
+                href="/uploads/<%= user.resume %>"
+                target="_blank"
+                class="resume-link"
+              >
+                <%= user.resume %>
+              </a>
+              <a
+                href="/uploads/<%= user.resume %>"
+                download
+                class="resume-download"
+              >
+                ⬇️
+              </a>
+            </div>
+            <% }else{%>
+            <p style="color: #666;">No resume uploaded</p>
+            <% } %>
+          </div>
+
+          <form
+            action="/student/upload-resume"
+            method="POST"
+            enctype="multipart/form-data"
+            class="profile-resume-form"
+            style="margin-top: 15px;"
+          >
+            <input type="file" name="resume" id="resume-input" accept=".pdf,.doc,.docx" required />
+            <button type="submit" class="upload-btn">Upload Resume</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Edit Profile</h2>
+          <span class="close" onclick="closeEditModal()">&times;</span>
+        </div>
+        <form id="editForm" onsubmit="submitEditForm(event)">
+          <input type="hidden" id="fieldType" />
+          <input 
+            type="text" 
+            id="fieldValue" 
+            placeholder="Enter new value" 
+            required
+          />
+          <button type="submit">Save Changes</button>
+          <button type="button" onclick="closeEditModal()" style="background-color: #95a5a6; margin-left: 10px;">Cancel</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function openEditModal(fieldType, currentValue) {
+        document.getElementById('fieldType').value = fieldType
+        document.getElementById('fieldValue').value = currentValue
+        document.getElementById('modalTitle').textContent = 'Edit ' + (fieldType === 'name' ? 'Name' : 'Email')
+        document.getElementById('editModal').style.display = 'block'
+      }
+
+      function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none'
+      }
+
+      function submitEditForm(event) {
+        event.preventDefault()
+        const fieldType = document.getElementById('fieldType').value
+        const fieldValue = document.getElementById('fieldValue').value
+
+        const data = {}
+        if(fieldType === 'name') {
+          data.name = fieldValue
+        } else if(fieldType === 'email') {
+          data.email = fieldValue
+        }
+
+        fetch('/student/update-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+          if(result.success) {
+            alert('Profile updated successfully')
+            location.reload()
+          } else {
+            alert('Error: ' + result.message)
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error)
+          alert('An error occurred while updating profile')
+        })
+      }
+
+      function removeSkill(skill) {
+        if(confirm('Are you sure you want to remove this skill?')) {
+          fetch('/student/remove-skill', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({skill})
+          })
+          .then(response => response.json())
+          .then(result => {
+            if(result.success) {
+              location.reload()
+            } else {
+              alert('Error removing skill: ' + result.message)
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error)
+            alert('An error occurred while removing skill')
+          })
+        }
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+        const modal = document.getElementById('editModal')
+        if (event.target == modal) {
+          modal.style.display = 'none'
+        }
+      }
+    </script>
+  </body>
+</html>
